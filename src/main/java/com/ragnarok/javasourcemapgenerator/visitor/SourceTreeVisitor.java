@@ -4,7 +4,6 @@ package com.ragnarok.javasourcemapgenerator.visitor;
 import com.ragnarok.javasourcemapgenerator.ClassNameMaps;
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.CompilationUnitTree;
-import com.sun.source.tree.ImportTree;
 import com.sun.source.util.TreeScanner;
 
 /**

@@ -28,16 +28,27 @@ public class ClassTreeVisitor {
         if (classTree.getKind() == Tree.Kind.CLASS || classTree.getKind() == Tree.Kind.INTERFACE 
                 || classTree.getKind() == Tree.Kind.ANNOTATION_TYPE) {
             if (!ignoreSelf) {
-                String qualifiedName = parseClassNameFromSimpleName(classTree.getSimpleName().toString());
+                String qualifiedName = null;
+                if (outerClassName != null) {
+                    qualifiedName = buildClassName(this.outerClassName, classTree.getSimpleName().toString());
+                } else {
+                    qualifiedName = buildClassName(this.packageName, classTree.getSimpleName().toString());
+                }
+                currentClassName = qualifiedName;
                 this.classNameMaps.addClass(qualifiedName);
-            } else if (outerClassName != null) {
+            } else if (this.outerClassName != null) {
                 currentClassName = buildClassName(this.outerClassName, classTree.getSimpleName().toString());
             }
             for (Tree member : classTree.getMembers()) {
                 if (member instanceof JCTree.JCClassDecl) {
                     JCTree.JCClassDecl classDecl = (JCTree.JCClassDecl) member;
                     String simpleName = classDecl.getSimpleName().toString();
-                    String qualifiedName = parseClassNameFromSimpleName(simpleName);
+                    String qualifiedName = null;
+                    if (this.outerClassName != null) {
+                        qualifiedName = buildClassName(this.outerClassName, simpleName);
+                    } else {
+                        qualifiedName = buildClassName(this.currentClassName, simpleName);
+                    }
                     this.classNameMaps.addClass(qualifiedName);
                     new ClassTreeVisitor().inspectClass(this.packageName, this.classNameMaps, classDecl, currentClassName, true);
                 }
@@ -48,16 +59,7 @@ public class ClassTreeVisitor {
     public ClassNameMaps getResult() {
         return this.classNameMaps;
     }
-    
-    private String parseClassNameFromSimpleName(String simpleName) {
-        String qualifiedName = null;
-        if (outerClassName != null) {
-            qualifiedName = buildClassName(this.outerClassName, simpleName);
-        } else {
-            qualifiedName = buildClassName(this.packageName, simpleName);
-        }
-        return qualifiedName;
-    }
+   
 
     private String buildClassName(String prefix, String simpleName) {
         simpleName = simpleName.replace(".", "");
