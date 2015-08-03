@@ -25,11 +25,6 @@ public class SourceTreeVisitor extends TreeScanner<Void, Void> {
     }
 
     @Override
-    public Void visitImport(ImportTree node, Void aVoid) {
-        return super.visitImport(node, aVoid);
-    }
-
-    @Override
     public Void visitClass(ClassTree node, Void aVoid) {
         classTreeVisitor.inspectClass(this.packageName, result, node, null, false);
         return null;
