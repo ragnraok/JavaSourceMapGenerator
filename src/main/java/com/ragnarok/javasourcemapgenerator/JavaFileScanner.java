@@ -1,5 +1,7 @@
 package com.ragnarok.javasourcemapgenerator;
 
+import com.ragnarok.javasourcemapgenerator.util.Log;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -19,6 +21,21 @@ public class JavaFileScanner {
         this.dir = dir;
     }
     
+    public ClassNameMaps scanAllJavaSources() throws FileNotFoundException {
+        long startTime = System.currentTimeMillis();
+        initJavaSourcePaths();
+        Log.d(TAG, "source paths: %s\n", allJavaSourcePaths.toString());
+        ClassNameMaps result = new ClassNameMaps();
+        if (allJavaSourcePaths.size() > 0) {
+            for (String path : allJavaSourcePaths) {
+                SourceClassParser sourceClassParser = new SourceClassParser(path);
+                result.addAll(sourceClassParser.parse());
+            }
+        }
+        long endTime = System.currentTimeMillis();
+        Log.i(TAG, "parse finish, used: %dms", endTime - startTime);
+        return result;
+    }
 
     private void initJavaSourcePaths() throws FileNotFoundException {
         File rootPath = new File(dir);
