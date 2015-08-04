@@ -50,7 +50,7 @@ public class ClassTreeVisitor {
                         qualifiedName = buildClassName(this.currentClassName, simpleName);
                     }
                     this.classNameMaps.addClass(qualifiedName);
-                    new ClassTreeVisitor().inspectClass(this.packageName, this.classNameMaps, classDecl, currentClassName, true);
+                    new ClassTreeVisitor().inspectClass(this.packageName, this.classNameMaps, classDecl, qualifiedName, true);
                 }
             }
         }
