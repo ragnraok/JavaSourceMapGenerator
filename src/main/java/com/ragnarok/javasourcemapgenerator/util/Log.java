@@ -1,6 +1,8 @@
 package com.ragnarok.javasourcemapgenerator.util;
 
 import com.ragnarok.javasourcemapgenerator.ClassNameMaps;
+import com.ragnarok.javasourcemapgenerator.Main;
+import com.ragnarok.javasourcemapgenerator.SourceMapWriter;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -38,6 +40,8 @@ public class Log {
     
     static {
         SHOW_LOG_TAG.add(ClassNameMaps.TAG);
+        SHOW_LOG_TAG.add(Main.TAG);
+        SHOW_LOG_TAG.add(SourceMapWriter.TAG);
     }
     
     public static void v(String TAG, String format, Object... args) {

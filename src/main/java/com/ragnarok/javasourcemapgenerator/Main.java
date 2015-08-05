@@ -1,5 +1,7 @@
 package com.ragnarok.javasourcemapgenerator;
 
+import com.ragnarok.javasourcemapgenerator.util.Log;
+
 import java.io.FileNotFoundException;
 
 /**
@@ -7,18 +9,20 @@ import java.io.FileNotFoundException;
  */
 public class Main {
     
+    public static final String TAG = "JavaSourceMapGenerator.Main";
+    
     public static void main(String[] args) {
-        JavaFileScanner fileScanner = new JavaFileScanner("src");
+
+        String path = args[1];
+        String outputFileName = args[2];
+        Log.i(TAG, "directory: %s", path);
+        JavaFileScanner fileScanner = new JavaFileScanner(path);
         try {
-            fileScanner.scanAllJavaSources();
+            ClassNameMaps classNameMaps = fileScanner.scanAllJavaSources();
+            SourceMapWriter.writeClassNameMaps(outputFileName, classNameMaps);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-        }
-    }
-    
-    public static class TestInnerClass {
-        class TestInnerClassClass {
-
+            Log.e(TAG, "scan failed: %s", e.getMessage());
         }
     }
 }
