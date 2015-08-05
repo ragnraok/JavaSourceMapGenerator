@@ -13,8 +13,8 @@ public class Main {
     
     public static void main(String[] args) {
 
-        String path = args[1];
-        String outputFileName = args[2];
+        String path = args[0];
+        String outputFileName = args[1];
         Log.i(TAG, "directory: %s", path);
         JavaFileScanner fileScanner = new JavaFileScanner(path);
         try {

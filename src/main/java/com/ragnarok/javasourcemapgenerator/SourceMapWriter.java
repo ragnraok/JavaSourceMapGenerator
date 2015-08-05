@@ -13,26 +13,18 @@ public class SourceMapWriter {
     
     public static void writeClassNameMaps(String outputFileName, ClassNameMaps classNameMaps) {
         File file = new File(outputFileName);
-        FileOutputStream fileOutputStream = null;
         PrintWriter writer = null;
         try {
-            fileOutputStream = new FileOutputStream(file);
-            writer = new PrintWriter(fileOutputStream);
+            writer = new PrintWriter(file);
             
             for (String className : classNameMaps.getAllClassNames()) {
+                Log.i(TAG, "write class: %s", className);
                 writer.println(className);
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             Log.e("writeClassNameMaps error: %s", e.getMessage());
         } finally {
-            if (fileOutputStream != null) {
-                try {
-                    fileOutputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
             if (writer != null) {
                 writer.close();
             }
