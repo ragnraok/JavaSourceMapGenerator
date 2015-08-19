@@ -19,12 +19,18 @@ public class SourceTreeVisitor extends TreeScanner<Void, Void> {
 
     @Override
     public Void visitCompilationUnit(CompilationUnitTree node, Void aVoid) {
+        if (node == null || node.getPackageName() == null) {
+            return null;
+        }
         packageName = node.getPackageName().toString();
         return super.visitCompilationUnit(node, aVoid);
     }
 
     @Override
     public Void visitClass(ClassTree node, Void aVoid) {
+        if (node == null) {
+            return super.visitClass(node, aVoid);
+        }
         classTreeVisitor.inspectClass(this.packageName, result, node, null, false);
         this.result = classTreeVisitor.getResult();
         return null;
