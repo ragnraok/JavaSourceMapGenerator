@@ -21,7 +21,7 @@ public class ClassNameMaps {
     } 
     
     public void addClass(String className) {
-        Log.d(TAG, "add Class: %s", className);
+//        Log.d(TAG, "add Class: %s", className);
         classNamesList.add(className);
     }
     

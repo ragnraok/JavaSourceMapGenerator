@@ -1,6 +1,7 @@
 package com.ragnarok.javasourcemapgenerator.util;
 
 import com.ragnarok.javasourcemapgenerator.ClassNameMaps;
+import com.ragnarok.javasourcemapgenerator.JavaFileScanner;
 import com.ragnarok.javasourcemapgenerator.Main;
 import com.ragnarok.javasourcemapgenerator.SourceMapWriter;
 
@@ -42,6 +43,7 @@ public class Log {
         SHOW_LOG_TAG.add(ClassNameMaps.TAG);
         SHOW_LOG_TAG.add(Main.TAG);
         SHOW_LOG_TAG.add(SourceMapWriter.TAG);
+        SHOW_LOG_TAG.add(JavaFileScanner.TAG);
     }
     
     public static void v(String TAG, String format, Object... args) {

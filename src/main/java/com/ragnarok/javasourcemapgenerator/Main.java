@@ -13,10 +13,11 @@ public class Main {
     
     public static void main(String[] args) {
 
+        long startTime = System.currentTimeMillis();
         String path = args[0];
         String outputFileName = args[1];
         Log.i(TAG, "directory: %s", path);
-        JavaFileScanner fileScanner = new JavaFileScanner(path);
+        JavaFileScanner fileScanner = new JavaFileScanner(path, 4);
         try {
             ClassNameMaps classNameMaps = fileScanner.scanAllJavaSources();
             SourceMapWriter.writeClassNameMaps(outputFileName, classNameMaps);
@@ -24,5 +25,7 @@ public class Main {
             e.printStackTrace();
             Log.e(TAG, "scan failed: %s", e.getMessage());
         }
+        long endTime = System.currentTimeMillis();
+        Log.i(TAG, "totally use %dms", endTime - startTime);
     }
 }

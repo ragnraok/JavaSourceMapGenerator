@@ -18,7 +18,7 @@ public class SourceMapWriter {
             writer = new PrintWriter(file);
             
             for (String className : classNameMaps.getAllClassNames()) {
-                Log.i(TAG, "write class: %s", className);
+//                Log.i(TAG, "write class: %s", className);
                 writer.println(className);
             }
         } catch (FileNotFoundException e) {
