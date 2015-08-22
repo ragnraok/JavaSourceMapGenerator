@@ -97,6 +97,7 @@ public class JavaFileScanner {
         int eachSubtaskListsize = size / threadNumber;
         int currentSplitStartIndex = 0;
         ClassNameMaps result = new ClassNameMaps();
+        Future[] futureList = new Future[threadNumber];
         for (int i = 0; i < threadNumber; i++) {
             int startIndex = currentSplitStartIndex > size ? size - 1 : currentSplitStartIndex;
             int endIndex = startIndex + eachSubtaskListsize > size ? size - 1 : startIndex + eachSubtaskListsize;
@@ -104,18 +105,29 @@ public class JavaFileScanner {
             currentSplitStartIndex = endIndex;
             List<String> subTaskList = allJavaSourcePaths.subList(startIndex, endIndex);
             if (subTaskList.size() > 0) {
-                executorService.submit(new SubTaskRunnable(subTaskList, result, i), true);
+                futureList[i] = executorService.submit(new SubTaskRunnable(subTaskList, result, i));
             }
         }
         
-        try {
-            executorService.shutdown();
-            executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            Log.e(TAG, "scanInMultiThreads, awaitTermination error: %s", e.getMessage());
+//        try {
+//            executorService.shutdown();
+//            executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//            Log.e(TAG, "scanInMultiThreads, awaitTermination error: %s", e.getMessage());
+//        }
+        
+        // wait all tasks finish
+        for (Future future : futureList) {
+            try {
+                future.get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
         }
-
+        executorService.shutdown();
 
         return result;
     }
