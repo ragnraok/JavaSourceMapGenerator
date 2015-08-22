@@ -23,7 +23,7 @@ public class JavaFileScanner {
     
     private boolean isInParallelMode = false;
     
-    private ExecutorService executorService;
+    private ThreadPoolExecutor executorService;
 
     public JavaFileScanner(String dir) {
         this.dir = dir;
@@ -31,9 +31,9 @@ public class JavaFileScanner {
         isInParallelMode = false;
     }
     
-    public JavaFileScanner(String dir, int threadNumber) {
+    public JavaFileScanner(String dir, int minThreadNumber) {
         this.dir = dir;
-        this.threadNumber = threadNumber;
+        this.threadNumber = minThreadNumber;
         if (this.threadNumber > 0) {
             initThreadPool();
             isInParallelMode = true;
@@ -41,7 +41,8 @@ public class JavaFileScanner {
     }
     
     private void initThreadPool() {
-        executorService = Executors.newFixedThreadPool(threadNumber);
+        executorService = new ThreadPoolExecutor(threadNumber, threadNumber * 2, 2L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+        executorService.allowCoreThreadTimeOut(true);
     }
 
     public ClassNameMaps scanAllJavaSources() throws FileNotFoundException {
@@ -105,26 +106,16 @@ public class JavaFileScanner {
             currentSplitStartIndex = endIndex;
             List<String> subTaskList = allJavaSourcePaths.subList(startIndex, endIndex);
             if (subTaskList.size() > 0) {
-                futureList[i] = executorService.submit(new SubTaskRunnable(subTaskList, result, i));
+                futureList[i] = executorService.submit(new SubTaskRunnable(subTaskList, result, i), true);
             }
         }
-        
-//        try {
-//            executorService.shutdown();
-//            executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//            Log.e(TAG, "scanInMultiThreads, awaitTermination error: %s", e.getMessage());
-//        }
-        
+                
         // wait all tasks finish
         for (Future future : futureList) {
             try {
                 future.get();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                Log.e(TAG, "scanInMultiThreads error: %s", e.getMessage());
             }
         }
         executorService.shutdown();
