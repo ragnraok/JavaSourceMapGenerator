@@ -4,6 +4,7 @@ import com.ragnarok.javasourcemapgenerator.ClassNameMaps;
 import com.ragnarok.javasourcemapgenerator.JavaFileScanner;
 import com.ragnarok.javasourcemapgenerator.Main;
 import com.ragnarok.javasourcemapgenerator.SourceMapWriter;
+import com.ragnarok.javasourcemapgenerator.visitor.SourceTreeVisitor;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

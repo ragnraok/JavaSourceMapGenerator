@@ -47,7 +47,7 @@ public class JavaFileScanner {
 
     public ClassNameMaps scanAllJavaSources() throws FileNotFoundException {
         initJavaSourcePaths();
-        Log.d(TAG, "source paths: %s\n", allJavaSourcePaths.toString());
+//        Log.d(TAG, "source paths: %s\n", allJavaSourcePaths.toString());
         if (!isInParallelMode) {
            return scanInSingleThread();
         } else {
@@ -60,6 +60,7 @@ public class JavaFileScanner {
         ClassNameMaps result = new ClassNameMaps();
         if (allJavaSourcePaths.size() > 0) {
             for (String path : allJavaSourcePaths) {
+//                Log.d(TAG, "parsing: %s", path);
                 SourceClassParser sourceClassParser = new SourceClassParser(path);
                 result.addAll(sourceClassParser.parse());
             }
@@ -84,6 +85,7 @@ public class JavaFileScanner {
         @Override
         public void run() {
             for (String path : subTaskList) {
+//                Log.d(TAG, "parsing: %s", path);
                 SourceClassParser sourceClassParser = new SourceClassParser(path);
                 result.addAll(sourceClassParser.parse());
             }

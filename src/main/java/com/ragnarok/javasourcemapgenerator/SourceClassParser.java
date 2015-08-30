@@ -1,5 +1,6 @@
 package com.ragnarok.javasourcemapgenerator;
 
+import com.github.javaparser.ast.CompilationUnit;
 import com.ragnarok.javasourcemapgenerator.visitor.SourceTreeVisitor;
 import com.sun.source.tree.CompilationUnitTree;
 
@@ -23,7 +24,7 @@ public class SourceClassParser {
     
     public ClassNameMaps parse() {
         result = new ClassNameMaps();
-        Iterable<? extends CompilationUnitTree> parseResult = null;
+        CompilationUnit parseResult = null;
         try {
             parseResult = sourceReader.readSource();
         } catch (FileNotFoundException e) {
@@ -31,10 +32,9 @@ public class SourceClassParser {
         }
         if (parseResult != null) {
             SourceTreeVisitor sourceTreeVisitor = new SourceTreeVisitor();
-            for (CompilationUnitTree compilationUnitTree : parseResult) {
-                compilationUnitTree.accept(sourceTreeVisitor, null);
-                result.addAll(sourceTreeVisitor.getResult());
-            }
+            sourceTreeVisitor.visit(parseResult, null);
+            parseResult.accept(sourceTreeVisitor, null);
+            result.addAll(sourceTreeVisitor.getResult());
         }
         return result;
     }

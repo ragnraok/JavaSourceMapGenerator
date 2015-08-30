@@ -1,71 +1,84 @@
 package com.ragnarok.javasourcemapgenerator.visitor;
 
+import com.github.javaparser.ast.body.AnnotationDeclaration;
+import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.TypeDeclaration;
 import com.ragnarok.javasourcemapgenerator.ClassNameMaps;
-import com.sun.source.tree.ClassTree;
-import com.sun.source.tree.Tree;
-import com.sun.tools.javac.tree.JCTree;
 
 /**
  * Created by ragnarok on 15/8/4.
  */
 public class ClassTreeVisitor {
-    
+
     public static final String TAG = "JavaSourceMapGenerator.ClassTreeVisitor";
-    
+
     private String packageName = null;
 
     private String outerClassName = null; // fully qualified
 
     private String currentClassName = null; // fully qualified
-    
+
     private ClassNameMaps classNameMaps = null;
-    
-    public void inspectClass(String packageName, ClassNameMaps classNameMaps, ClassTree classTree, String outerClassName, boolean ignoreSelf) {
+
+    public void insepectTypeDeclaration(String packageName, ClassNameMaps classNameMaps, TypeDeclaration classTree, String outerClassName, boolean ignoreSelf) {
         this.packageName = packageName;
         this.classNameMaps = classNameMaps;
         this.outerClassName = outerClassName;
 
-        if (classTree.getKind() == Tree.Kind.CLASS || classTree.getKind() == Tree.Kind.INTERFACE 
-                || classTree.getKind() == Tree.Kind.ANNOTATION_TYPE) {
+        if (classTree != null) {
             if (!ignoreSelf) {
                 String qualifiedName = null;
                 if (outerClassName != null) {
-                    qualifiedName = buildClassName(this.outerClassName, classTree.getSimpleName().toString());
+                    qualifiedName = buildClassName(this.outerClassName, classTree.getName());
                 } else {
-                    qualifiedName = buildClassName(this.packageName, classTree.getSimpleName().toString());
+                    qualifiedName = buildClassName(this.packageName, classTree.getName());
                 }
                 currentClassName = qualifiedName;
                 this.classNameMaps.addClass(qualifiedName);
             } else if (this.outerClassName != null) {
-                currentClassName = buildClassName(this.outerClassName, classTree.getSimpleName().toString());
+                currentClassName = buildClassName(this.outerClassName, classTree.getName());
             }
-            for (Tree member : classTree.getMembers()) {
-                if (member instanceof JCTree.JCClassDecl) {
-                    JCTree.JCClassDecl classDecl = (JCTree.JCClassDecl) member;
-                    String simpleName = classDecl.getSimpleName().toString();
-                    String qualifiedName = null;
-                    if (this.outerClassName != null) {
-                        qualifiedName = buildClassName(this.outerClassName, simpleName);
-                    } else {
-                        qualifiedName = buildClassName(this.currentClassName, simpleName);
+            if (classTree.getMembers() != null) {
+                for (BodyDeclaration member : classTree.getMembers()) {
+                    if (member instanceof ClassOrInterfaceDeclaration) {
+                        ClassOrInterfaceDeclaration classDecl = (ClassOrInterfaceDeclaration) member;
+                        String simpleName = classDecl.getName();
+                        String qualifiedName = null;
+                        if (this.outerClassName != null) {
+                            qualifiedName = buildClassName(this.outerClassName, simpleName);
+                        } else {
+                            qualifiedName = buildClassName(this.currentClassName, simpleName);
+                        }
+                        this.classNameMaps.addClass(qualifiedName);
+                        new ClassTreeVisitor().insepectTypeDeclaration(this.packageName, this.classNameMaps, classDecl, qualifiedName, true);
+                    } else if (member instanceof AnnotationDeclaration) {
+                        AnnotationDeclaration annotationDeclaration = (AnnotationDeclaration) member;
+                        String simpleName = annotationDeclaration.getName();
+                        String qualifiedName = null;
+                        if (this.outerClassName != null) {
+                            qualifiedName = buildClassName(this.outerClassName, simpleName);
+                        } else {
+                            qualifiedName = buildClassName(this.currentClassName, simpleName);
+                        }
+                        this.classNameMaps.addClass(qualifiedName);
                     }
-                    this.classNameMaps.addClass(qualifiedName);
-                    new ClassTreeVisitor().inspectClass(this.packageName, this.classNameMaps, classDecl, qualifiedName, true);
                 }
             }
+
         }
     }
-    
+
     public ClassNameMaps getResult() {
         return this.classNameMaps;
     }
-   
+
 
     private String buildClassName(String prefix, String simpleName) {
         simpleName = simpleName.replace(".", "");
         if (prefix.endsWith(".")) {
             return prefix + simpleName;
-        } else  {
+        } else {
             return prefix + "." + simpleName;
         }
     }
