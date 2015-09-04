@@ -69,7 +69,7 @@ public class SourceTreeVisitor extends VoidVisitorAdapter {
     @Override
     public void visit(EnumDeclaration node, Object arg) {
         if (node == null) {
-            super.visit(node, arg);
+           return;
         }
         if (packageName == null && node.getParentNode() instanceof CompilationUnit) {
             CompilationUnit compilationUnit = (CompilationUnit) node.getParentNode();
