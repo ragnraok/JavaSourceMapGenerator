@@ -4,6 +4,7 @@ package com.ragnarok.javasourcemapgenerator.visitor;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.AnnotationDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.ragnarok.javasourcemapgenerator.ClassNameMaps;
 import com.ragnarok.javasourcemapgenerator.util.Log;
@@ -12,6 +13,7 @@ import com.ragnarok.javasourcemapgenerator.util.Log;
  * Created by ragnarok on 15/8/2.
  */
 public class SourceTreeVisitor extends VoidVisitorAdapter {
+    //TODO: Enum parse support
     
     public static final String TAG = "JavaSourceMapGenerator.SourceTreeVisitor";
     
@@ -45,7 +47,7 @@ public class SourceTreeVisitor extends VoidVisitorAdapter {
         }
         if (node.getName() != null) {
             Log.d(TAG, "visit ClassOrInterfaceDeclaration, packageName: %s, className: %s", packageName, node.getName());
-            classTreeVisitor.insepectTypeDeclaration(this.packageName, result, node, null, false);
+            classTreeVisitor.inspectTypeDeclaration(this.packageName, result, node, null, false);
             result = classTreeVisitor.getResult();
         }
         
@@ -56,8 +58,26 @@ public class SourceTreeVisitor extends VoidVisitorAdapter {
         if (node == null) {
             super.visit(node, arg);
         }
-        classTreeVisitor.insepectTypeDeclaration(this.packageName, result, node, null, false);
+        if (packageName == null && node.getParentNode() instanceof CompilationUnit) {
+            CompilationUnit compilationUnit = (CompilationUnit) node.getParentNode();
+            packageName = compilationUnit.getPackage().getName().getName();
+        }
+        classTreeVisitor.inspectTypeDeclaration(this.packageName, result, node, null, false);
         result = classTreeVisitor.getResult();
+    }
+    
+    @Override
+    public void visit(EnumDeclaration node, Object arg) {
+        if (node == null) {
+            super.visit(node, arg);
+        }
+        if (packageName == null && node.getParentNode() instanceof CompilationUnit) {
+            CompilationUnit compilationUnit = (CompilationUnit) node.getParentNode();
+            packageName = compilationUnit.getPackage().getName().getName();
+        }
+        classTreeVisitor.inspectTypeDeclaration(this.packageName, result, node, null, false);
+        result = classTreeVisitor.getResult();
+        
     }
 
     public ClassNameMaps getResult() {

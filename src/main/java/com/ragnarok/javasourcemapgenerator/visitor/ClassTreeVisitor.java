@@ -1,9 +1,6 @@
 package com.ragnarok.javasourcemapgenerator.visitor;
 
-import com.github.javaparser.ast.body.AnnotationDeclaration;
-import com.github.javaparser.ast.body.BodyDeclaration;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.TypeDeclaration;
+import com.github.javaparser.ast.body.*;
 import com.ragnarok.javasourcemapgenerator.ClassNameMaps;
 
 /**
@@ -21,7 +18,7 @@ public class ClassTreeVisitor {
 
     private ClassNameMaps classNameMaps = null;
 
-    public void insepectTypeDeclaration(String packageName, ClassNameMaps classNameMaps, TypeDeclaration classTree, String outerClassName, boolean ignoreSelf) {
+    public void inspectTypeDeclaration(String packageName, ClassNameMaps classNameMaps, TypeDeclaration classTree, String outerClassName, boolean ignoreSelf) {
         this.packageName = packageName;
         this.classNameMaps = classNameMaps;
         this.outerClassName = outerClassName;
@@ -51,10 +48,20 @@ public class ClassTreeVisitor {
                             qualifiedName = buildClassName(this.currentClassName, simpleName);
                         }
                         this.classNameMaps.addClass(qualifiedName);
-                        new ClassTreeVisitor().insepectTypeDeclaration(this.packageName, this.classNameMaps, classDecl, qualifiedName, true);
+                        new ClassTreeVisitor().inspectTypeDeclaration(this.packageName, this.classNameMaps, classDecl, qualifiedName, true);
                     } else if (member instanceof AnnotationDeclaration) {
                         AnnotationDeclaration annotationDeclaration = (AnnotationDeclaration) member;
                         String simpleName = annotationDeclaration.getName();
+                        String qualifiedName = null;
+                        if (this.outerClassName != null) {
+                            qualifiedName = buildClassName(this.outerClassName, simpleName);
+                        } else {
+                            qualifiedName = buildClassName(this.currentClassName, simpleName);
+                        }
+                        this.classNameMaps.addClass(qualifiedName);
+                    } else if (member instanceof EnumDeclaration) {
+                        EnumDeclaration enumDeclaration = (EnumDeclaration) member;
+                        String simpleName = enumDeclaration.getName();
                         String qualifiedName = null;
                         if (this.outerClassName != null) {
                             qualifiedName = buildClassName(this.outerClassName, simpleName);
