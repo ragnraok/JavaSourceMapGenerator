@@ -76,9 +76,9 @@ public class JavaFileScanner {
         private ClassNameMaps result;
         private int threadNo;
         
-        public SubTaskRunnable(List<String> subTaskList, ClassNameMaps result, int threadNo) {
+        public SubTaskRunnable(List<String> subTaskList, int threadNo) {
             this.subTaskList = subTaskList;
-            this.result = result;
+            this.result = new ClassNameMaps();
             this.threadNo = threadNo;
         }
 
@@ -92,23 +92,29 @@ public class JavaFileScanner {
             
             Log.i(TAG, "thread: %d, parsing finish", threadNo);
         }
+        
+        public ClassNameMaps getResult() {
+            return this.result;
+        }
     }
     
     private ClassNameMaps scanInMultiThreads() {
         int size = allJavaSourcePaths.size();
         Log.i(TAG, "size: %d, threadNumber: %d", size, threadNumber);
-        int eachSubtaskListsize = size / threadNumber;
+        int eachSubtaskListSize = size / threadNumber;
         int currentSplitStartIndex = 0;
         ClassNameMaps result = new ClassNameMaps();
         Future[] futureList = new Future[threadNumber];
+        SubTaskRunnable[] subTaskRunnableList = new SubTaskRunnable[threadNumber];
         for (int i = 0; i < threadNumber; i++) {
             int startIndex = currentSplitStartIndex > size ? size - 1 : currentSplitStartIndex;
-            int endIndex = startIndex + eachSubtaskListsize > size ? size - 1 : startIndex + eachSubtaskListsize;
+            int endIndex = startIndex + eachSubtaskListSize > size ? size - 1 : startIndex + eachSubtaskListSize;
             Log.i(TAG, "scanInMultiThreads, startIndex: %d, endIndex: %d", startIndex, endIndex);
             currentSplitStartIndex = endIndex;
             List<String> subTaskList = allJavaSourcePaths.subList(startIndex, endIndex);
             if (subTaskList.size() > 0) {
-                futureList[i] = executorService.submit(new SubTaskRunnable(subTaskList, result, i), true);
+                subTaskRunnableList[i] = new SubTaskRunnable(subTaskList, i);
+                futureList[i] = executorService.submit(subTaskRunnableList[i], true);
             }
         }
                 
@@ -120,6 +126,10 @@ public class JavaFileScanner {
                 Log.e(TAG, "scanInMultiThreads error: %s", e.getMessage());
             }
         }
+        for (SubTaskRunnable runnable : subTaskRunnableList) {
+            result.addAll(runnable.getResult());
+        }
+        
         executorService.shutdown();
 
         return result;
